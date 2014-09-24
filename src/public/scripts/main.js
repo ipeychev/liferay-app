@@ -6,22 +6,22 @@
 
   setTimeout(function() {
     console.log('Trying to update...');
-    users.emit('update', { id: 'iliyan', age: 30, serviceName: users.nsp });
+    users.send({ id: 'iliyan', age: 30, serviceName: users.nsp, _method: 'UPDATE' });
   }, 1000);
 
   setTimeout(function() {
     console.log('Trying to add...');
-    users.emit('add', { id: 'maira', age: 25, serviceName: users.nsp });
+    users.send({ id: 'maira', age: 25, serviceName: users.nsp, _method: 'PUT' });
   }, 2000);
 
   setTimeout(function() {
     console.log('Trying to remove...');
-    users.emit('remove', { id: 'maira', serviceName: users.nsp });
+    users.send({ id: 'maira', serviceName: users.nsp, _method: 'DELETE' });
   }, 3000);
 
   setTimeout(function() {
     console.log('Trying to find...');
-    users.emit('find', { id: 'iliyan', serviceName: users.nsp });
+    users.send({ id: 'iliyan', serviceName: users.nsp, _method: 'GET' });
   }, 4000);
 
   var comments = io('http://localhost:3000/data/comments');

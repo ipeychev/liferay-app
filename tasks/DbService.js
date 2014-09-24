@@ -11,10 +11,7 @@ function DbService(io) {
   namepaces.forEach(function(namespace) {
     io.of(namespace).on('connection', function(socket) {
       console.log('Client connected', namespace);
-      socket.on('add', self.handleAdd_.bind(self, socket));
-      socket.on('find', self.handleFind_.bind(self, socket));
-      socket.on('update', self.handleUpdate_.bind(self, socket));
-      socket.on('remove', self.handleRemove_.bind(self, socket));
+      socket.on('message', self.handleMessage_.bind(self, socket));
     });
   });
 }
@@ -89,60 +86,62 @@ DbService.isAuthorizedService = function(serviceName) {
 
 DbService.prototype.io = null;
 
-DbService.prototype.handleAdd_ = function(socket, data) {
+DbService.prototype.handleMessage_ = function(socket, data) {
   if (!DbService.isAuthorizedService(data.serviceName)) {
     socket.emit('error', 'Service not found');
   }
 
+  var method = data._method;
+  delete data._method;
+
+  switch (method) {
+    case 'PUT':
+    case 'POST':
+      this.handleAdd_(socket, data);
+      break;
+    case 'DELETE':
+      this.handleRemove_(socket, data);
+      break;
+    case 'UPDATE':
+      this.handleUpdate_(socket, data);
+      break;
+    case 'GET':
+      this.handleFind_(socket, data);
+      break;
+  }
+  console.log('\n\n', DbService.storage);
+};
+
+DbService.prototype.handleAdd_ = function(socket, data) {
   try {
     socket.emit('data', DbService.storage.add(data));
   } catch (err) {
     socket.emit('error', 'Cannot add');
   }
-
-  console.log('\n\n', DbService.storage);
 };
 
 DbService.prototype.handleFind_ = function(socket, data) {
-  if (!DbService.isAuthorizedService(data.serviceName)) {
-    socket.emit('error', 'Service not found');
-  }
-
   try {
     socket.emit('data', DbService.storage.find(data));
   } catch (err) {
     socket.emit('error', 'Cannot find');
   }
-
-  console.log('\n\n', DbService.storage);
 };
 
 DbService.prototype.handleUpdate_ = function(socket, data) {
-  if (!DbService.isAuthorizedService(data.serviceName)) {
-    socket.emit('error', 'Service not found');
-  }
-
   try {
     socket.emit('data', DbService.storage.update(data));
   } catch (err) {
     socket.emit('error', 'Cannot update');
   }
-
-  console.log('\n\n', DbService.storage);
 };
 
 DbService.prototype.handleRemove_ = function(socket, data) {
-  if (!DbService.isAuthorizedService(data.serviceName)) {
-    socket.emit('error', 'Service not found');
-  }
-
   try {
     socket.emit('data', DbService.storage.remove(data));
   } catch (err) {
     socket.emit('error', 'Cannot remove');
   }
-
-  console.log('\n\n', DbService.storage);
 };
 
 module.exports = DbService;
