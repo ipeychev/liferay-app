@@ -1,7 +1,31 @@
 (function() {
   'use strict';
-  /*global io*/
+  /* global io,lfr */
 
+  var dbMechanism = new lfr.HttpDbMechanism('http://localhost:3000/data/users');
+  var db = new lfr.Db(dbMechanism);
+
+  setTimeout(function() {
+    console.log('Trying to update...');
+    db.put({ id: 'iliyan', age: 30 });
+  }, 1000);
+
+  setTimeout(function() {
+    console.log('Trying to add...');
+    db.post({ id: 'maira', age: 25 });
+  }, 2000);
+
+  setTimeout(function() {
+    console.log('Trying to remove...');
+    db.delete({ id: 'maira' });
+  }, 3000);
+
+  setTimeout(function() {
+    console.log('Trying to find...');
+    db.get({ id: 'iliyan' });
+  }, 4000);
+
+  /*
   var users = io('http://localhost:3000/data/users');
 
   setTimeout(function() {
@@ -29,5 +53,7 @@
   comments.on('data', function(data) {
     console.log('/data/comments', data);
   });
+
+*/
 
 }());

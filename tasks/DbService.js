@@ -29,7 +29,14 @@ DbService.storage = {
       throw new Error('Service not found');
     }
 
-    DbService.storage[serviceName].push(data);
+    DbService.storage[serviceName].push(data.data);
+
+    return {
+      messageId: data.messageId,
+      status: {
+        code: 0
+      }
+    };
   },
 
   find: function(data) {
@@ -39,9 +46,17 @@ DbService.storage = {
       throw new Error('Service not found');
     }
 
-    return DbService.storage[serviceName].filter(function(entry) {
-      return data.id === entry.id;
+    var entry = DbService.storage[serviceName].filter(function(entry) {
+      return data.data.id === entry.id;
     });
+
+    return {
+      data: entry,
+      messageId: data.messageId,
+      status: {
+        code: 0
+      }
+    };
   },
 
   remove: function(data) {
@@ -52,10 +67,18 @@ DbService.storage = {
     }
 
     var entry = DbService.storage.find(data);
+
     if (entry) {
       var entryIndex = DbService.storage[serviceName].indexOf(entry);
       DbService.storage[serviceName].splice(entryIndex, 1);
     }
+
+    return {
+      messageId: data.messageId,
+      status: {
+        code: 0
+      }
+    };
   },
 
   update: function(data) {
@@ -66,10 +89,18 @@ DbService.storage = {
     }
 
     var results = DbService.storage.find(data);
+
     if (results.length) {
       var entryIndex = DbService.storage[serviceName].indexOf(results[0]);
       DbService.storage[serviceName][entryIndex] = data;
     }
+
+    return {
+      messageId: data.messageId,
+      status: {
+        code: 0
+      }
+    };
   }
 };
 
@@ -91,18 +122,19 @@ DbService.prototype.handleMessage_ = function(socket, data) {
     socket.emit('error', 'Service not found');
   }
 
+  console.log(data);
+
   var method = data._method;
   delete data._method;
 
   switch (method) {
-    case 'PUT':
     case 'POST':
       this.handleAdd_(socket, data);
       break;
     case 'DELETE':
       this.handleRemove_(socket, data);
       break;
-    case 'UPDATE':
+    case 'PUT':
       this.handleUpdate_(socket, data);
       break;
     case 'GET':
